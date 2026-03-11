@@ -3,7 +3,6 @@ flask-cors==6.0.2
 gunicorn==21.2.0
 
 tensorflow==2.13.0
-keras==2.13.1
 
 numpy==1.24.3
 pillow==10.4.0
