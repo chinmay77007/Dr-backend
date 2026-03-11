@@ -3,6 +3,7 @@ from flask_cors import CORS
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import keras
 import cv2
 from tf_keras_vis.gradcam_plus_plus import GradcamPlusPlus
 from tf_keras_vis.utils.scores import CategoricalScore
@@ -20,7 +21,7 @@ if not os.path.exists("static"):
 # LOAD MODEL
 # ---------------------------
 MODEL_PATH = "dr_efficientnet_model.keras"
-model = tf.keras.models.load_model(MODEL_PATH, compile=False, safe_mode=False)
+model = keras.models.load_model(MODEL_PATH, compile=False, safe_mode=False)
 class_names = [
     "No DR",
     "Mild",
