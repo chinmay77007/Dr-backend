@@ -3,12 +3,21 @@ from flask_cors import CORS
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-import keras
 import cv2
 from tf_keras_vis.gradcam_plus_plus import GradcamPlusPlus
 from tf_keras_vis.utils.scores import CategoricalScore
 from tf_keras_vis.utils.model_modifiers import ReplaceToLinear
 import os
+import sys
+import keras
+
+# ---- Keras compatibility patch ----
+sys.modules['keras.src'] = keras
+sys.modules['keras.src.models'] = keras.models
+sys.modules['keras.src.layers'] = keras.layers
+sys.modules['keras.src.utils'] = keras.utils
+sys.modules['keras.src.backend'] = keras.backend
+# ----------------------------------
 # ---------------------------
 # CREATE FLASK APP
 # ---------------------------
@@ -21,7 +30,12 @@ if not os.path.exists("static"):
 # LOAD MODEL
 # ---------------------------
 MODEL_PATH = "dr_efficientnet_model.keras"
-model = keras.models.load_model(MODEL_PATH, compile=False, safe_mode=False)
+try:
+    model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+    print("Model loaded")
+except Exception as e:
+    print("Model failed to load:", e)
+    model = None
 class_names = [
     "No DR",
     "Mild",
