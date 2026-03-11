@@ -77,9 +77,12 @@ def home():
 # ---------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
+
+    if model is None:
+        return jsonify({"error": "Model not loaded"}), 500
+
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
-    file = request.files["file"]
     # Read image
     original_img = Image.open(file).convert("RGB")
     original_img = original_img.resize((224, 224))
