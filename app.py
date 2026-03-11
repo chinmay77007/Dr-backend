@@ -20,7 +20,7 @@ if not os.path.exists("static"):
 # LOAD MODEL
 # ---------------------------
 MODEL_PATH = "dr_efficientnet_model.keras"
-model = tf.keras.models.load_model(MODEL_PATH)
+model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 class_names = [
     "No DR",
     "Mild",
