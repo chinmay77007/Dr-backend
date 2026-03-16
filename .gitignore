@@ -3,8 +3,5 @@ __pycache__/
 *.pyc
 *.keras
 *.h5
-model.keras
 static/
-*.jpg
-*.jpeg
-*.png
+_
