@@ -9,7 +9,6 @@ from tf_keras_vis.utils.scores import CategoricalScore
 from tf_keras_vis.utils.model_modifiers import ReplaceToLinear
 import os
 import uuid
-import requests
 
 # ---------------------------
 # CREATE FLASK APP
@@ -22,27 +21,8 @@ if not os.path.exists("static"):
 
 # ---------------------------
 # LOAD MODEL
-# Downloads from Google Drive on first startup
 # ---------------------------
-
-MODEL_PATH = "model.keras"
-MODEL_URL  = os.environ.get("MODEL_URL", "")
-
-def download_model():
-    if os.path.exists(MODEL_PATH):
-        print("Model already present.")
-        return
-    if not MODEL_URL:
-        print("No MODEL_URL set.")
-        return
-    print("Downloading model...")
-    response = requests.get(MODEL_URL, stream=True)
-    with open(MODEL_PATH, "wb") as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            f.write(chunk)
-    print("Model downloaded.")
-
-download_model()
+MODEL_PATH = "dr_efficientnet_model.keras"
 
 try:
     model = tf.keras.models.load_model(MODEL_PATH, compile=False)
@@ -52,7 +32,7 @@ except Exception as e:
     model = None
 
 class_names = ["No DR", "Mild", "Moderate", "Severe", "Proliferative DR"]
-IMG_SIZE = 224  # old model uses 224px
+IMG_SIZE = 224
 
 
 # ---------------------------
@@ -95,23 +75,19 @@ def predict():
 
     file = request.files["file"]
 
-    # Read and resize image
     original_img   = Image.open(file).convert("RGB")
     original_img   = original_img.resize((IMG_SIZE, IMG_SIZE))
     original_array = np.array(original_img)
 
-    # Prepare for model — old model uses efficientnet preprocess_input
     img = np.expand_dims(original_array, axis=0).astype(np.float32)
     img = tf.keras.applications.efficientnet.preprocess_input(img)
 
-    # Predict
     preds           = model.predict(img)
     probs           = tf.nn.softmax(preds[0]).numpy()
     predicted_index = int(np.argmax(probs))
     predicted_label = class_names[predicted_index]
     confidence      = float(np.max(probs))
 
-    # GradCAM
     try:
         heatmap  = generate_gradcam(model, img, predicted_index)
         heatmap  = cv2.resize(heatmap, (IMG_SIZE, IMG_SIZE))
